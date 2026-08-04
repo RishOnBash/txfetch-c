@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/statvfs.h>
-#include <sys/sysinfo.h>
 #include <sys/utsname.h>
 #include <sys/system_properties.h>
 #define GN "\033[38;5;118m" // Green
@@ -49,7 +48,7 @@ float cpuFreq(void) {
 }
 
 // get RAM usage
-int get_proc_ram_info(unsigned long *used_mb, unsigned long *total_mb) {
+int ramInfo(unsigned long *used_mb, unsigned long *total_mb) {
     FILE *fp = fopen("/proc/meminfo", "r");
     if (!fp) return -1;
 
@@ -99,7 +98,7 @@ int main(void) {
     unsigned long gb = 0, free = 0, total = 0, used = 0;
 
     // theres some issue, works on one device breaks on other
-    if (statvfs(getenv("PREFIX"), &disk) == 0) {
+    if (statvfs("/data", &disk) == 0) {
         gb = 1073741824;
         total = (disk.f_blocks * disk.f_frsize) / gb;
         free = (disk.f_bavail * disk.f_frsize) / gb;
@@ -124,7 +123,7 @@ int main(void) {
     printf("   %sDISK:%s    %s%lu / %lu GB%s\n",
             GN, RT, GC, used, total, RT);
 
-    if (get_proc_ram_info(&usedRAM, &totalRAM) == 0)
+    if (ramInfo(&usedRAM, &totalRAM) == 0)
     printf("   %sRAM:%s     %s%lu / %lu MB%s\n\n",
             GN, RT, GC, usedRAM, totalRAM, RT);
     /* To be fixed stuff
