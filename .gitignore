@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# Exceptions
+!*.c
+!Makefile
+!.gitignore
+!README.md
+!LICENSE
