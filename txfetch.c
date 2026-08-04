@@ -48,6 +48,28 @@ float cpuFreq(void) {
     return Khz / 1000000.0;
 }
 
+// get RAM usage
+int get_proc_ram_info(unsigned long *used_mb, unsigned long *total_mb) {
+    FILE *fp = fopen("/proc/meminfo", "r");
+    if (!fp) return -1;
+
+    char line[128];
+    unsigned long mem_total = 0, mem_avail = 0;
+
+    while (fgets(line, sizeof(line), fp)) {
+        if (sscanf(line, "MemTotal: %lu kB", &mem_total) == 1) continue;
+        if (sscanf(line, "MemAvailable: %lu kB", &mem_avail) == 1) break;
+    }
+    fclose(fp);
+
+    if (mem_total == 0 || mem_avail == 0) return -1;
+
+    *total_mb = mem_total / 1024;
+    *used_mb  = (mem_total - mem_avail) / 1024;
+
+    return 0;
+}
+
 int main(void) {
     // check is Android
     if (!getenv("ANDROID_DATA")) exit(1);
@@ -56,6 +78,7 @@ int main(void) {
     char device[10];
     char model[10];
     char cpu[10];
+    unsigned long totalRAM = 0, usedRAM = 0;
 
     __system_property_get("ro.build.version.release", os_ver);
     __system_property_get("ro.product.manufacturer", device);
@@ -73,8 +96,9 @@ int main(void) {
     
     // get disk stats
     struct statvfs disk;
-    unsigned long gb, free, total, used;
+    unsigned long gb = 0, free = 0, total = 0, used = 0;
 
+    // theres some issue, works on one device breaks on other
     if (statvfs(getenv("PREFIX"), &disk) == 0) {
         gb = 1073741824;
         total = (disk.f_blocks * disk.f_frsize) / gb;
@@ -84,20 +108,6 @@ int main(void) {
 
     // get cores
     int cores = get_nprocs_conf();
-
-    // get RAM usage
-    struct sysinfo info;
-
-    if (sysinfo(&info) < 0) {
-        perror("sysinfo");
-        exit(EXIT_FAILURE);
-    }
-
-    unsigned long mb, used_ram, total_ram, free_ram;
-    mb = 1048576;
-    total_ram = (info.totalram * info.mem_unit) / mb;
-    free_ram = (info.freeram * info.mem_unit) / mb;
-    used_ram = total_ram - free_ram;
 
     // print output
     puts("");
@@ -113,8 +123,10 @@ int main(void) {
             GN, RT, GC, shellName(), RT);
     printf("   %sDISK:%s    %s%lu / %lu GB%s\n",
             GN, RT, GC, used, total, RT);
+
+    if (get_proc_ram_info(&usedRAM, &totalRAM) == 0)
     printf("   %sRAM:%s     %s%lu / %lu MB%s\n\n",
-            GN, RT, GC, used_ram, total_ram, RT);
+            GN, RT, GC, usedRAM, totalRAM, RT);
     /* To be fixed stuff
     printf("   %sUPTIME:%s  %s%lds%s\n\n",
             GN, RT, GC, info.uptime, RT);
