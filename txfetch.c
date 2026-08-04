@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/sysinfo.h>
 #include <sys/statvfs.h>
 #include <sys/utsname.h>
 #include <sys/system_properties.h>
@@ -22,13 +23,9 @@
 // get Shell name
 char *shellName(void) {
     char *shell = getenv("SHELL");
-    if (strstr(shell, "/bin/bash")) {
-        return "bash";
-    } else if (strstr(shell, "/bin/zsh")) {
-        return "zsh";
-    } else if (strstr(shell, "/bin/fish")) {
-        return "fish";
-    }  
+    if (strstr(shell, "/bin/bash")) return "bash";
+    if (strstr(shell, "/bin/zsh")) return "zsh";
+    if (strstr(shell, "/bin/fish")) return "fish";
     return "bash";
 }
 
