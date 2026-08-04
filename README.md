@@ -29,9 +29,9 @@ make uninstall
 ```
 
 ## TODO
-- [] Add uptime
-- [] Seperate function for specific task
-- [] Get pacakages count
+- [ ] Add uptime
+- [ ] Seperate function for specific task
+- [ ] Get pacakages count
 
 ## License
 MIT
