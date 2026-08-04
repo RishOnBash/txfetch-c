@@ -2,14 +2,14 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 TARGET = txfetch
 SRC = txfetch.c
-INSTALL_DIR = $(PREFIX)/local/bin
+INSTALL_DIR = $(PREFIX)/bin
 
 all: $(TARGET)
 
 $(TARGET): $(SRC)
 	@$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
 
-install:
+install: all
 	@mkdir -p $(INSTALL_DIR)
 	@mv $(TARGET) $(INSTALL_DIR)
 	@echo "> Installed: $(TARGET)"
